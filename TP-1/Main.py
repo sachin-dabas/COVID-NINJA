@@ -2,8 +2,7 @@
 # testing initial functions for the design of game
 
 ###########################################
-#! I.  drawViruses
-#! II. change score when clicking
+#TP-1
 ###########################################
 
 # modes reference- https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#usingModes
@@ -13,6 +12,7 @@ from cmu_112_graphics import *
 import random
 import math
 from PIL import ImageTk, Image
+
 
 # splashScreenMode
 def splashScreenMode_redrawAll(app,canvas):
@@ -47,30 +47,30 @@ def gameMode_timerFired(app):
 
 # Main File
 def appStarted(app):
+    #define splash screen
     app.mode = 'splashScreenMode'
-    # app.mode = 'gameMode'
+    #load images for background
     app.image1 = app.loadImage('background.jpg')
     app.image2 = app.scaleImage(app.image1, 1.5)
+    # initialize app score
     app.score = 0
     app.timerDelay = 40
+    # define virus and types
     app.virusShape = [
-                    [20,20,10,'red'],
-                    [100,40,20,'green'],
-                    [60,60,40,'pink']
+        [(0,-50),(-39,-31),(-49,11),(-22,45),(22,45),(49,11),(39,-31)],
+        [(-50,0),(-35,30),(0,40),(35,30),(50,0),(35,-30),(0,-40),(-35,-30)],
+        [(-50,0),(-35,30),(0,40),(35,30),(50,0),(35,-30),(0,-40),(-35,-30)],
                      ]
     initVirus(app)
     app.dx = random.randint(6,12)
     app.dy = random.randint(12,24)
-    # app.dx = random.choice([+1,-1])*random.randint(3,6)
-    # app.dy = random.choice([+1,-1])*random.randint(3,6)
 
 def initVirus(app):
     shape = getRandomVirus(app)
-    (app.x,app.y,app.r,app.color) = (shape[0],shape[1],shape[2],shape[3])
 
 def getRandomVirus(app):
-    n = random.randint(0,2)
-    return(app.virusShape[n])
+    i = random.randint(0,2)
+    return(app.virusShape[i])
 
 def moveVirus(app):
     app.y -= app.dy
@@ -79,7 +79,6 @@ def moveVirus(app):
         app.dy += app.dy
     if (app.y < 0) or (app.y > app.height): 
         app.dy = -app.dy
-
 
 # This runs the app
 runApp(width=600, height=600)
