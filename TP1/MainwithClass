@@ -1,0 +1,157 @@
+# Battle of pathogens- 1.0
+# testing initial functions for the design of game
+
+###################################################
+# TP-01
+###################################################
+
+# import libraries
+import math
+import time
+import random
+from PIL import ImageTk, Image
+from cmu_112_graphics import *
+
+#! for later use
+# def splashScreen(app,canvas):
+#     canvas.create_text(app.width//2,app.height//2, text = "Battle of Pathogens",
+#                              font = 'Arial 24 bold', fill='white')
+#     canvas.create_text(app.width//2,app.height//2+100, text = "Press any key",
+#                              font = 'Arial 18 bold', fill='white')
+
+class Main(App):
+    def appStarted(self):
+        self.score = 0
+        self.lastWave = time.time()
+        self.timeBetweenWaves = 3
+        self.num = 3
+        self.timerDelay = 1
+        self.prevTime = time.time()
+        self.virusShape = [
+                [(0,-25),(-40,-40),(-50,10),(-25,45),(25,45),(50,10),(40,-40)],
+                [(0,-50),(-40,-40),(-50,10),(-25,45),(25,45),(50,10),(40,-40)],
+                [(0,-75),(-40,-40),(-75,10),(-25,45),(25,45),(70,10),(40,-40),],
+                        ]
+        self.virusTypes = [
+                        "bacteria",
+                        "amoeba",
+                        "ebola",
+                        ]
+        Main.initVirus(self)
+        # app.mode = 'splashScreenMode'
+
+    def getVirus(self):
+        i = random.randint(0,2)
+        return (self.virusTypes[i],self.virusShape[i])
+
+    def initVirus(self):
+        self.virus = []
+        (f, shape) = Main.getVirus(self)
+        Main.waveViruses(self)
+        self.grav = 600 #! change logic
+
+    def waveViruses(self,num=3):
+        for i in range(num):
+            xCoord = random.randint(int(self.width/6),int(self.width*(5/6))) #!change logic
+            dx,dy = float(random.randint(-self.width//10,self.width//10)), -float(random.randint(int(self.height*7/8),self.height)) #!change logic
+            # drawing viruses on the screen
+            if (xCoord < self.width): 
+                dx += dx
+            else: dx = -dx
+            Main.makeNewVirus(self,xCoord,dx,dy)
+
+    def makeNewVirus(self,xCoord,dx,dy):
+        virusesList = [ ]
+        (type, shape) = Main.getVirus(self)
+        newVirus = Virus(shape, (xCoord,self.height), (dx,dy), type)
+        virusesList.append(newVirus)
+        self.virus += virusesList
+##########################################################
+    def mousePressed(self, event):
+        start = (event.x, event.y)
+
+    def mouseReleased(self, event):
+        self.mousePress = False
+
+    def timerFired(self):
+        Main.doStep(self)       
+                
+    def doStep(self):
+        if((time.time() - self.lastWave) > self.timeBetweenWaves):
+            #draw random num of viruses
+            i = random.randint(1,5)
+            self.num = i + self.score//30
+            if(self.num > 8):
+                self.num = 8
+            Main.waveViruses(self,self.num)
+            self.lastWave = time.time()
+        for f in self.virus:
+            f.move(self.grav, (time.time()-self.prevTime))
+        self.prevTime = time.time()
+
+    def redrawAll(self, canvas):
+        # splashScreen(app,canvas)
+        Main.drawBackdrop(self,canvas)
+        Main.drawViruses(self, canvas)
+        Main.drawScore(self,canvas)
+
+    def drawScore(app,canvas):
+        margin = 100
+        canvas.create_text(app.width-margin, margin, text= f"{app.score}",
+                        font='Arial 60 bold', fill = "grey")
+
+    def drawBackdrop(self, canvas):
+        canvas.create_rectangle(0,0,self.width,self.height,fill='black')
+
+    #! change logic
+    def globalToLocal(self,points,cx,cy): #canvas coordinates to centroid
+        result = copy.deepcopy(points)
+        for i in range(len(result)):
+            (x,y) = result[i]
+            result[i] = (x-cx, y-cy)
+        return result
+
+    #! change logic
+    def localToGlobal(self,points,cx,cy): #centroid coordinates to canvas
+        result = copy.deepcopy(points)
+        for i in range(len(result)):
+            (x,y) = result[i]
+            result[i] = (x+cx, y+cy)
+        return result
+        
+    def drawViruses(self, canvas):
+        for f in self.virus:
+            (cx, cy) = f.pos
+            coords = Main.localToGlobal(self,f.points,cx,cy)
+            canvas.create_polygon(coords, fill='red',width=1)
+
+class Virus(object):
+    def __init__(self, points, pos, speed, virusType):
+        self.points = points
+        self.pos = pos
+        self.speed = speed
+        self.VirusType = virusType
+
+    def move(self, dt): #grav = pixels/frame, pre-calculated
+        dx, dy = self.speed
+        x,y = self.pos
+        self.pos = (x+dx*dt, y+dy*dt) #!change position based on velocity
+        self.speed = (dx, dy+self.grav*dt) #!gravitational acceleration
+
+#inheritance
+class Bacteria(Virus):
+    def __init__(self, points, pos, speed, virusType):
+        pass
+
+Main(width=1100, height=800)
+
+
+# # splashScreenMode
+# def splashScreenMode_redrawAll(app,canvas):
+#     canvas.create_text(app.width//2,app.height//2, text = "Battle of Pathogens",
+#                              font = 'Arial 24 bold', fill='brown')
+#     canvas.create_text(app.width//2,app.height//2+100, text = "Press any key",
+#                              font = 'Arial 18 bold', fill='brown')
+
+# def splashScreenMode_keyPressed(app,event):
+#     app.mode = not app.mode
