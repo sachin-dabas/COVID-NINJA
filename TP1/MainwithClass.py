@@ -12,17 +12,16 @@ import random
 from PIL import ImageTk, Image
 from cmu_112_graphics import *
 
-
 class Main(App):
     def appStarted(self):
         self.score = 0
+        self.prevTime = time.time()
         self.time0 = time.time() #define time for last draw
         self.time1 = 3 # define the time between drawing of viruses
         self.num = 3 #initialize the number of drawing viruses in the beginning
-        self.timerDelay = 1
-        self.prevTime = time.time() #! check 
-        #define the shape of viruses
+        self.timerDelay = 1 
         # app.mode = 'splashScreenMode'
+        #define the shape of viruses
         self.virusShape = [
                 [(0,-25),(-40,-40),(-50,10),(-25,45),(25,45),(50,10),(40,-40)],
                 [(0,-50),(-40,-40),(-50,10),(-25,45),(25,45),(50,10),(40,-40)],
@@ -34,32 +33,13 @@ class Main(App):
                         "amoeba",
                         "ebola",
                         ]
+        #define the colors of viruses
         self.virusColors = [ "red", "yellow", "magenta", "pink", "cyan", 
                             "green", "orange" ]                
         Main.initVirus(self)
 
-    def initVirus(self):
-        self.allViruses = [ ] #initialise empty list for viruses
-        (type, shape) = Main.getRandomVirus(self)
-        Main.virusesChain(self)
-    #helper function for initVirus    
-    def getRandomVirus(self):
-        randomIndex = random.randint(0,2)
-        return (self.virusTypes[randomIndex],self.virusShape[randomIndex])
-    
-    #draw viruses in a loop
-    def virusesChain(self,num=3):
-        for i in range(num):
-            val = random.randint(2,6)
-            x = self.width//val
-            dx = random.randint(-self.width/10, self.width/10)
-            dy = -(random.randint(self.height*7/8,self.height))
-            # drawing viruses on the screen
-            if (x < self.width): 
-                dx += dx
-            else: dx = -dx
-            Main.makeNewVirus(self,x,dx,dy)
 
+    #helper function for virusesChain    
     def makeNewVirus(self,xvalue,dx,dy):
         virusesList = [ ]
         (type, shape) = Main.getRandomVirus(self)
@@ -68,18 +48,40 @@ class Main(App):
         virusesList.append(newVirus)
         self.allViruses += virusesList
 
+    #helper function for initVirus    
+    def getRandomVirus(self):
+        randomIndex = random.randint(0,2)
+        return (self.virusTypes[randomIndex],self.virusShape[randomIndex])
+    
+    def initVirus(self):
+        self.allViruses = [ ] #initialise empty list for viruses
+        (type, shape) = Main.getRandomVirus(self)
+        Main.virusesChain(self)
+
     def timerFired(self):
-        Main.doStep(self)       
-                
-    def doStep(self): #! check
+        Main.takeStep(self)
+       
+    def takeStep(self): #! check
         if((time.time() - self.time0) > self.time1):
             #draw random num of viruses
-            self.num = random.randint(1,5)
-            if(self.num > 8):
-                self.num = 8
-            Main.virusesChain(self,self.num)
-            self.time0 = time.time()
+            num = random.randint(1,5)
+            Main.virusesChain(self,num)# make a chain of viruses
+            self.time0 = time.time() #donot set // this can be used in special mode 
         Main.moveVirus(self)
+        
+    #draw viruses in a loop
+    def virusesChain(self,num=3):
+        for i in range(num):
+            val = random.randint(2,6)
+            x = self.width//val
+            dx = random.randint(-self.width//20, self.width//20)
+            dy = -(random.randint(self.height//3,self.height))
+            # drawing viruses on the screen
+            if (x < self.width): 
+                dx += dx
+            else: dx = -dx
+            #make new virus
+            Main.makeNewVirus(self,x,dx,dy)
 
     def moveVirus(self):    
         for virus in self.allViruses:
@@ -97,12 +99,11 @@ class Main(App):
         canvas.create_text(app.width-margin, margin, text= f"{app.score}",
                         font='Arial 60 bold', fill = "grey")
 
-    #! change logic
-    def localToGlobal(self,points,cx,cy): #centroid coordinates to canvas
+    def modifyCoordinates(self,points,cx,cy): #centroid coordinates to canvas
         result = copy.deepcopy(points)
-        for i in range(len(result)):
-            (x,y) = result[i]
-            result[i] = (x+cx, y+cy)
+        for coordinates in range(len(result)):
+            (x,y) = result[coordinates]
+            result[coordinates] = (x+cx, y+cy)
         return result
         
     # access all viruses and create polygons
@@ -110,11 +111,11 @@ class Main(App):
         for virus in self.allViruses:
                 (cx, cy) = virus.pos
                 color = virus.color
-                myCordinates = Main.localToGlobal(self,virus.myShape,cx,cy)
+                myCordinates = Main.modifyCoordinates(self,virus.myShape,cx,cy)
                 canvas.create_polygon(myCordinates, fill=color,width=1)
 
 class Virus(object):
-
+    
     def splashScreen(self,canvas):
         canvas.create_text(self.width//2,self.height//2, text = "Battle of Pathogens",
                                 font = 'Arial 24 bold', fill='white')
