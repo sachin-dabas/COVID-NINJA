@@ -137,7 +137,7 @@ class Main(App):
                 cx,cy = virus.pos
                 color = virus.color
                 myCordinates = Main.modifyCoordinates(self,virus.myShape,cx,cy)
-                canvas.create_polygon(myCordinates, fill=color,width=10)
+                canvas.create_polygon(myCordinates, fill=color,width=100)
 
     # clip function code copied from 
     # https://rosettacode.org/wiki/Sutherland-Hodgman_polygon_clipping#Python
