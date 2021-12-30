@@ -22,13 +22,13 @@ The following list contains all the files:
 ## Following Libraries are required:
 
 The following libraries are required:
-PIL
-cmu_112_graphics
-Pygame (for audio)
-datetime
-cv2
-numpy
-pywin32
-Threading
-pyAutoGUI
-mss
+-PIL
+-cmu_112_graphics
+-Pygame (for audio)
+-datetime
+-cv2
+-numpy
+-pywin32
+-Threading
+-pyAutoGUI
+-mss
