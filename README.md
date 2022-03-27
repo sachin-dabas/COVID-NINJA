@@ -1,6 +1,5 @@
 
 # COVID-NINJA
----
 
 Covid Ninja is a computer-based videogame designed and coded in Python using the Tkinter visual library as part of the Final Project for Fundamentals of Programming and Computer Science CS 15112.
 
